@@ -1671,7 +1671,7 @@ function ShowSettings()
     LangBtn.Position = UDim2.new(0, 0, 0, 60)
     
     -- Haptic Button
-    local HapBtn = CreateButton(T("Haptic") .. ":" .. (HapticEnabled and "ON" : "OFF"), CONFIG.Themes[CurrentTheme].AccentGold, Content, function()
+    local HapBtn = CreateButtonT("Haptic") .. ": " .. (HapticEnabled and "ON" : "OFF"), CONFIG.Themes[CurrentTheme].AccentGold, Content, function()
         HapticEnabled = not HapticEnabled
         HapBtn.Text = T("Haptic") .. ": " .. (HapticEnabled and "ON" : "OFF")
         Notify("Haptic: " .. (HapticEnabled and "ON" : "OFF"), "success")
