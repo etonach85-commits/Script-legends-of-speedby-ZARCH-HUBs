@@ -2583,4 +2583,4 @@ end
 -- Final confirmation
 Notify("System", "All systems initialized successfully!", "check-circle", 3)
 
-return window
+return Window
