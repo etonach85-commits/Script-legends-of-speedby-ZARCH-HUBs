@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Maps Pro - OpenStreetMap Edition</title>
+    
+    <!-- Leaflet CSS (Gratis & Open Source) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+
+    <style>
+        /* ==========================================================================
+           CSS VARIABLES & THEME CONFIGURATION
+           ========================================================================== */
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-color: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --danger-color: #ef4444;
+            --success-color: #22c55e;
+            --border-radius: 8px;
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ==========================================================================
+           GLOBAL RESET & TYPOGRAPHY
+           ========================================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* ==========================================================================
+           MAIN LAYOUT GRID
+           ========================================================================== */
+        .app-container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* ==========================================================================
+           HEADER & NAVBAR
+           ========================================================================== */
+        .header {
+            grid-column: 1 / -1;
+            background-color: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--bg-tertiary);
+            z-index: 1000;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-title svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--accent-color);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* ==========================================================================
+           BUTTONS & CONTROLS
+           ========================================================================== */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-ghost {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--bg-tertiary);
+        }
+
+        .btn-ghost:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* ==========================================================================
+           SIDEBAR & SEARCH PANEL
+           ========================================================================== */
+        .sidebar {
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--bg-tertiary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .search-container {
+            padding: 20px;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            background-color: var(--bg-tertiary);
+            border: 1px solid transparent;
+            border-radius: var(--border-radius);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: var(--transition-fast);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            width: 18px;
+            height: 18px;
+        }
+
+        .search-results {
+            max-height: 250px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .result-item {
+            padding: 12px;
+            background-color: var(--bg-tertiary);
+            border-radius: var(--border-radius);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .result-item:hover {
+            background-color: #475569;
+            transform: translateX(4px);
+        }
+
+        .result-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .result-address {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* ==========================================================================
+           SIDEBAR TABS & HISTORY
+           ========================================================================== */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: var(--transition-fast);
+        }
+
+        .tab.active {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .history-item-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-item-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .history-item-dist {
+            font-size: 0.75rem;
+            color: var(--accent-color);
+        }
+
+        /* ==========================================================================
+           MAP CONTAINER
+           ========================================================================== */
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: #1e1e1e;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Override Leaflet Default Styles for Dark Theme */
+        .leaflet-control-zoom a {
+            background-color: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--bg-tertiary) !important;
+        }
+
+        .leaflet-control-zoom a:hover {
+            background-color: var(--bg-tertiary) !important;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .leaflet-popup-tip {
+            background: var(--bg-secondary);
+        }
+
+        .custom-popup .leaflet-popup-content {
+            margin: 12px 16px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* ==========================================================================
+           MAP OVERLAY CONTROLS (Floating Buttons)
+           ========================================================================== */
+        .map-controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .fab {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-fast);
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            background-color: var(--accent-hover);
+        }
+
+        .fab svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* ==========================================================================
+           TOAST NOTIFICATIONS
+           ========================================================================== */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background-color: var(--bg-secondary);
+            border-left: 4px solid var(--accent-color);
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            min-width: 250px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: var(--transition-smooth);
+            pointer-events: auto;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            border-left-color: var(--danger-color);
+        }
+
+        .toast.success {
+            border-left-color: var(--success-color);
+        }
+
+        /* ==========================================================================
+           SCROLLBARS
+           ========================================================================== */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* ==========================================================================
+           LOADING SPINNER
+           ========================================================================== */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 0.8s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ==========================================================================
+           RESPONSIVE MEDIA QUERIES
+           ========================================================================== */
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 60px 40vh 1fr;
+            }
+
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid var(--bg-tertiary);
+                order: 2;
+            }
+
+            .map-container {
+                order: 3;
+                height: 100%;
+            }
+
+            .header-title span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Application Grid -->
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title">
+                <!-- Map SVG Icon -->
+                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                <span>Web Maps Pro (OSM Edition)</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-ghost" id="btnClearHistory">Hapus Riwayat</button>
+                <button class="btn btn-primary" id="btnLocateMe">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/></svg>
+                    Lokasi Gue
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="search-container">
+                <div class="search-box">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Cari alamat, kota, atau tempat..." autocomplete="off">
+                </div>
+                <div class="search-results" id="searchResults">
+                    <!-- Search Results will be injected here -->
+                </div>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="history">Riwayat</div>
+                <div class="tab" data-tab="info">Info Jarak</div>
+            </div>
+
+            <div class="history-list" id="historyList">
+                <!-- History Items injected here -->
+                <p style="text-align: center; color: var(--text-secondary); margin-top: 20px;">Belum ada riwayat pencarian.</p>
+            </div>
+        </aside>
+
+        <!-- Map Container -->
+        <main class="map-container">
+            <div id="map"></div>
+            
+            <!-- Floating Action Buttons -->
+            <div class="map-controls">
+                <button class="fab" id="fabLayers" title="Ganti Layer Peta">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+
+    <script>
+        /**
+         * ==========================================================================
+         * WEB MAPS PRO - OSM & NOMINATIM ENGINE
+         * ==========================================================================
+         * Arsitektur OOP untuk state management yang solid, mencegah memory leak,
+         * dan memaksimalkan efisiensi komputasi (Haversine & Debounce).
+         * ==========================================================================
+         */
+
+        class WebMapPro {
+            constructor() {
+                // State Management
+                this.map = null;
+                this.userMarker = null;
+                this.searchMarkers = {}; // Hash Map O(1) untuk marker lookup
+                this.userLocation = { lat: -6.1754, lng: 106.8272 }; // Fallback: Monas, Jakarta
+                this.currentLayer = 'street';
+                this.tileLayers = {};
+                this.searchHistory = JSON.parse(localStorage.getItem('map_history')) || [];
+                
+                // DOM Elements
+                this.els = {
+                    map: document.getElementById('map'),
+                    searchInput: document.getElementById('searchInput'),
+                    searchResults: document.getElementById('searchResults'),
+                    historyList: document.getElementById('historyList'),
+                    toastContainer: document.getElementById('toastContainer'),
+                    btnLocate: document.getElementById('btnLocateMe'),
+                    btnClear: document.getElementById('btnClearHistory'),
+                    fabLayers: document.getElementById('fabLayers'),
+                    tabs: document.querySelectorAll('.tab')
+                };
+
+                // API Endpoints (Gratis & Tanpa API Key)
+                this.NOMINATIM_SEARCH = 'https://nominatim.openstreetmap.org/search';
+                this.NOMINATIM_REVERSE = 'https://nominatim.openstreetmap.org/reverse';
+
+                this.init();
+            }
+
+            init() {
+                this.initMap();
+                this.initTileLayers();
+                this.initGeolocation();
+                this.bindEvents();
+                this.renderHistory();
+                this.showToast('Sistem siap! Gunakan search untuk mencari lokasi.', 'success');
+            }
+
+            /**
+             * Inisialisasi Peta Leaflet
+             */
+            initMap() {
+                this.map = L.map('map', {
+                    center: [this.userLocation.lat, this.userLocation.lng],
+                    zoom: 13,
+                    zoomControl: false // Kita pakai custom control
+                });
+
+                // Tambah Zoom Control di pojok kiri atas
+                L.control.zoom({ position: 'topleft' }).addTo(this.map);
+
+                // Event Listener untuk klik peta (Reverse Geocoding)
+                this.map.on('click', (e) => this.handleMapClick(e));
+            }
+
+            /**
+             * Setup Berbagai Tile Layer (Street, Satellite, Topography)
+             */
+            initTileLayers() {
+                this.tileLayers.street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 19
+                }).addTo(this.map);
+
+                this.tileLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: 'Tiles &copy; Esri',
+                    maxZoom: 18
+                });
+
+                this.tileLayers.topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                    attribution: 'Map data: &copy; OpenTopoMap',
+                    maxZoom: 17
+                });
+            }
+
+            /**
+             * Siklus Layer Peta
+             */
+            cycleLayers() {
+                this.map.removeLayer(this.tileLayers[this.currentLayer]);
+                
+                if (this.currentLayer === 'street') {
+                    this.currentLayer = 'satellite';
+                } else if (this.currentLayer === 'satellite') {
+                    this.currentLayer = 'topo';
+                } else {
+                    this.currentLayer = 'street';
+                }
+                
+                this.tileLayers[this.currentLayer].addTo(this.map);
+                this.showToast(`Layer diubah ke: ${this.currentLayer.toUpperCase()}`, 'success');
+            }
+
+            /**
+             * Geolocation User dengan Fallback Error Handling
+             */
+            initGeolocation() {
+                if (!navigator.geolocation) {
+                    this.showToast('Browser tidak mendukung Geolocation.', 'error');
+                    return;
+                }
+
+                this.els.btnLocate.innerHTML = '<div class="spinner"></div>';
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        this.userLocation.lat = position.coords.latitude;
+                        this.userLocation.lng = position.coords.longitude;
+                        this.updateUserMarker();
+                        this.map.flyTo([this.userLocation.lat, this.userLocation.lng], 15, { duration: 1.5 });
+                        this.els.btnLocate.innerHTML = 'Lokasi Gue';
+                    },
+                    (error) => {
+                        this.showToast('Akses lokasi ditolak. Menggunakan lokasi default (Jakarta).', 'error');
+                        this.updateUserMarker();
+                        this.els.btnLocate.innerHTML = 'Lokasi Gue';
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            }
+
+            /**
+             * Update Marker User
+             */
+            updateUserMarker() {
+                const userIcon = L.divIcon({
+                    className: 'custom-user-marker',
+                    html: `<div style="width:20px; height:20px; background:#38bdf8; border:3px solid #fff; border-radius:50%; box-shadow:0 0 10px rgba(56,189,248,0.8);"></div>`,
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
+                });
+
+                if (this.userMarker) {
+                    this.userMarker.setLatLng([this.userLocation.lat, this.userLocation.lng]);
+                } else {
+                    this.userMarker = L.marker([this.userLocation.lat, this.userLocation.lng], { icon: userIcon })
+                        .addTo(this.map)
+                        .bindPopup('<b>Lokasi Anda Saat Ini</b>');
+                }
+            }
+
+            /**
+             * Algoritma Haversine (O(1)) untuk Kalkulasi Jarak
+             */
+            calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371e3; // Radius bumi dalam meter
+                const φ1 = lat1 * Math.PI / 180;
+                const φ2 = lat2 * Math.PI / 180;
+                const Δφ = (lat2 - lat1) * Math.PI / 180;
+                const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+                const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                          Math.cos(φ1) * Math.cos(φ2) *
+                          Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+                return R * c; // Jarak dalam meter
+            }
+
+            /**
+             * Format Jarak ke String yang mudah dibaca
+             */
+            formatDistance(meters) {
+                if (meters < 1000) return `${Math.round(meters)} m`;
+                return `${(meters / 1000).toFixed(2)} km`;
+            }
+
+            /**
+             * Algoritma Debounce (Mencegah HTTP 429 Nominatim)
+             */
+            debounce(func, wait) {
+                let timeout;
+                return function (...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
+
+            /**
+             * Fetch API Nominatim untuk Search
+             */
+            async fetchLocations(query) {
+                if (query.length < 3) {
+                    this.els.searchResults.innerHTML = '';
+                    return;
+                }
+
+                this.els.searchResults.innerHTML = '<div class="spinner"></div>';
+
+                try {
+                    const params = new URLSearchParams({
+                        q: query,
+                        format: 'json',
+                        addressdetails: 1,
+                        limit: 5,
+                        'accept-language': 'id'
+                    });
+
+                    const response = await fetch(`${this.NOMINATIM_SEARCH}?${params}`, {
+                        headers: { 'User-Agent': 'WebMapProApp/1.0' } // Wajib menurut Nominatim ToS
+                    });
+
+                    if (!response.ok) throw new Error('Nominatim API Rate Limited / Error');
+                    
+                    const data = await response.json();
+                    this.renderSearchResults(data);
+                } catch (err) {
+                    this.showToast('Gagal mengambil data pencarian.', 'error');
+                    this.els.searchResults.innerHTML = '<p style="color:var(--danger-color); text-align:center;">Error API</p>';
+                }
+            }
+
+            /**
+             * Render Hasil Search ke DOM
+             */
+            renderSearchResults(data) {
+                this.els.searchResults.innerHTML = '';
+                
+                if (data.length === 0) {
+                    this.els.searchResults.innerHTML = '<p style="text-align:center; color:var(--text-secondary);">Lokasi tidak ditemukan.</p>';
+                    return;
+                }
+
+                data.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'result-item';
+                    div.innerHTML = `
+                        <div class="result-name">${item.display_name.split(',')[0]}</div>
+                        <div class="result-address">${item.display_name}</div>
+                    `;
+                    div.addEventListener('click', () => this.selectLocation(item));
+                    this.els.searchResults.appendChild(div);
+                });
+            }
+
+            /**
+             * Aksi saat User Memilih Lokasi
+             */
+            selectLocation(item) {
+                const lat = parseFloat(item.lat);
+                const lon = parseFloat(item.lon);
+                const name = item.display_name.split(',')[0];
+
+                this.map.flyTo([lat, lon], 16, { duration: 1.5 });
+                this.addSearchMarker(lat, lon, name, item.display_name);
+                this.saveToHistory(name, item.display_name, lat, lon);
+                
+                // Clear Search UI
+                this.els.searchInput.value = '';
+                this.els.searchResults.innerHTML = '';
+            }
+
+            /**
+             * Manajemen Marker (O(1) Hash Map implementation)
+             */
+            addSearchMarker(lat, lng, name, address) {
+                this.clearSearchMarkers(); // Cegah Memory Leak
+
+                const customIcon = L.divIcon({
+                    className: 'custom-search-marker',
+                    html: `<svg width="30" height="40" viewBox="0 0 24 24" fill="#ef4444" stroke="#fff" stroke-width="1"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="3" fill="#fff"/></svg>`,
+                    iconSize: [30, 40],
+                    iconAnchor: [15, 40]
+                });
+
+                const markerId = `marker_${Date.now()}`;
+                const distance = this.calculateDistance(this.userLocation.lat, this.userLocation.lng, lat, lng);
+                
+                const marker = L.marker([lat, lng], { icon: customIcon })
+                    .addTo(this.map)
+                    .bindPopup(`
+                        <div class="custom-popup">
+                            <strong>${name}</strong><br>
+                            <small>${address}</small><br>
+                            <hr style="border:0; border-top:1px solid #334155; margin:8px 0;">
+                            <b>Jarak dari Anda:</b> ${this.formatDistance(distance)}
+                        </div>
+                    `)
+                    .openPopup();
+
+                // Simpan ke Hash Map
+                this.searchMarkers[markerId] = marker;
+
+                // Gambar Polyline (Garis Rute)
+                const routeLine = L.polyline(
+                    [[this.userLocation.lat, this.userLocation.lng], [lat, lng]], 
+                    { color: '#38bdf8', weight: 4, opacity: 0.7, dashArray: '5, 10' }
+                ).addTo(this.map);
+                
+                this.searchMarkers['route'] = routeLine;
+            }
+
+            /**
+             * Clear Marker dari Peta dan Memori
+             */
+            clearSearchMarkers() {
+                Object.keys(this.searchMarkers).forEach(id => {
+                    this.map.removeLayer(this.searchMarkers[id]);
+                    delete this.searchMarkers[id]; // Hapus referensi memori
+                });
+            }
+
+            /**
+             * Reverse Geocoding saat Peta di Klik
+             */
+            async handleMapClick(e) {
+                const { lat, lng } = e.latlng;
+                
+                try {
+                    const params = new URLSearchParams({
+                        lat: lat,
+                        lon: lng,
+                        format: 'json',
+                        'accept-language': 'id'
+                    });
+
+                    const response = await fetch(`${this.NOMINATIM_REVERSE}?${params}`, {
+                        headers: { 'User-Agent': 'WebMapProApp/1.0' }
+                    });
+
+                    const data = await response.json();
+                    if (data && data.display_name) {
+                        L.popup()
+                            .setLatLng(e.latlng)
+                            .setContent(`<b>Alamat:</b><br>${data.display_name}`)
+                            .openOn(this.map);
+                    }
+                } catch (err) {
+                    console.warn('Reverse geocoding gagal:', err);
+                }
+            }
+
+            /**
+             * Local Storage Management
+             */
+            saveToHistory(name, address, lat, lng) {
+                const distance = this.calculateDistance(this.userLocation.lat, this.userLocation.lng, lat, lng);
+                
+                const historyItem = {
+                    id: Date.now(),
+                    name: name,
+                    address: address,
+                    lat: lat,
+                    lng: lng,
+                    distance: this.formatDistance(distance)
+                };
+
+                this.searchHistory.unshift(historyItem);
+                if (this.searchHistory.length > 10) this.searchHistory.pop(); // Batasi 10 riwayat
+                
+                localStorage.setItem('map_history', JSON.stringify(this.searchHistory));
+                this.renderHistory();
+            }
+
+            renderHistory() {
+                this.els.historyList.innerHTML = '';
+                
+                if (this.searchHistory.length === 0) {
+                    this.els.historyList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); margin-top: 20px;">Belum ada riwayat pencarian.</p>';
+                    return;
+                }
+
+                this.searchHistory.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    div.innerHTML = `
+                        <div class="history-item-info">
+                            <span class="history-item-name">${item.name}</span>
+                            <span class="history-item-dist">${item.distance}</span>
+                        </div>
+                    `;
+                    div.addEventListener('click', () => {
+                        this.map.flyTo([item.lat, item.lng], 16, { duration: 1.5 });
+                        this.addSearchMarker(item.lat, item.lng, item.name, item.address);
+                    });
+                    this.els.historyList.appendChild(div);
+                });
+            }
+
+            /**
+             * Toast Notification Engine
+             */
+            showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                
+                this.els.toastContainer.appendChild(toast);
+                
+                // Trigger reflow untuk animasi CSS
+                void toast.offsetWidth; 
+                toast.classList.add('show');
+
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 400);
+                }, 3000);
+            }
+
+            /**
+             * Bind Semua Event Listeners
+             */
+            bindEvents() {
+                // Search Input dengan Debounce (500ms)
+                const debouncedFetch = this.debounce(this.fetchLocations.bind(this), 500);
+                this.els.searchInput.addEventListener('input', (e) => debouncedFetch(e.target.value));
+
+                // Buttons
+                this.els.btnLocate.addEventListener('click', () => this.initGeolocation());
+                this.els.btnClear.addEventListener('click', () => {
+                    this.searchHistory = [];
+                    localStorage.removeItem('map_history');
+                    this.renderHistory();
+                    this.showToast('Riwayat berhasil dihapus.', 'success');
+                });
+
+                this.els.fabLayers.addEventListener('click', () => this.cycleLayers());
+
+                // Tabs (UI Interactions)
+                this.els.tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        this.els.tabs.forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        // Logic tambahan untuk tab info bisa ditambahkan di sini
+                    });
+                });
+            }
+        }
+
+        /**
+         * Boot up the application when DOM is fully loaded.
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            window.app = new WebMapPro();
+        });
+    </script>
+</body>
+  </html>
