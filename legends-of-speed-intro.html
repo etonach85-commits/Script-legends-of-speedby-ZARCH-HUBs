@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legends of Speed - Ultimate Script v6.0.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #8b5cf6;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #f8fafc;
+            --gray: #64748b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 50%, #1e1b4b 100%);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation span {
+            position: absolute;
+            display: block;
+            width: 20px;
+            height: 20px;
+            background: rgba(99, 102, 241, 0.2);
+            animation: move 25s infinite;
+            bottom: -150px;
+            border-radius: 50%;
+        }
+
+        @keyframes move {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+                border-radius: 50%;
+            }
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+                opacity: 0;
+                border-radius: 50%;
+            }
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 80px 20px 40px;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 50px rgba(99, 102, 241, 0.5);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.5)); }
+            to { filter: drop-shadow(0 0 40px rgba(236, 72, 153, 0.8)); }
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: var(--gray);
+            margin-top: 10px;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Sections */
+        section {
+            margin: 60px 0;
+            padding: 40px;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
+            border-color: var(--primary);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--light);
+        }
+
+        .feature-desc {
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        /* Stats */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 25px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+
+        /* Controls */
+        .controls-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .control-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .control-item:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateX(10px);
+        }
+
+        .key {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: 700;
+            margin-right: 15px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .action {
+            color: var(--light);
+            font-size: 1.1rem;
+        }
+
+        /* Pet & Trail Lists */
+        .list-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .list-category {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .category-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-items {
+            list-style: none;
+        }
+
+        .category-items li {
+            padding: 8px 0;
+            color: var(--gray);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-items li:before {
+            content: "✓";
+            color: var(--secondary);
+            font-weight: 900;
+        }
+
+        /* Changelog */
+        .changelog-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .changelog-item {
+            padding: 15px 20px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .changelog-item strong {
+            color: var(--primary);
+        }
+
+        /* Disclaimer */
+        .disclaimer {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(245, 158, 11, 0.1));
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .disclaimer h3 {
+            color: #ef4444;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+            margin-top: 60px;
+        }
+
+        .developer {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .developer span {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+
+            h2 {
+                font-size: 2rem;
+            }
+
+            .features-grid,
+            .stats-container,
+            .list-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scroll Animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <span style="left: 10%; width: 30px; height: 30px; animation-duration: 20s;"></span>
+        <span style="left: 20%; width: 20px; height: 20px; animation-duration: 25s; animation-delay: 2s;"></span>
+        <span style="left: 35%; width: 40px; height: 40px; animation-duration: 18s; animation-delay: 4s;"></span>
+        <span style="left: 50%; width: 25px; height: 25px; animation-duration: 22s; animation-delay: 1s;"></span>
+        <span style="left: 65%; width: 35px; height: 35px; animation-duration: 24s; animation-delay: 3s;"></span>
+        <span style="left: 80%; width: 20px; height: 20px; animation-duration: 19s; animation-delay: 5s;"></span>
+        <span style="left: 90%; width: 30px; height: 30px; animation-duration: 21s; animation-delay: 2s;"></span>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <h1 class="logo">⚡ Legends of Speed</h1>
+        <p class="subtitle">Ultimate Edition Script</p>
+        <div class="version-badge">🚀 Version 6.0.0 - WindUI Framework Enhanced</div>
+    </header>
+
+    <div class="container">
+        <!-- Introduction -->
+        <section class="fade-in">
+            <h2>🎮 Tentang Script Ini</h2>
+            <p style="font-size: 1.1rem; line-height: 1.8; color: var(--gray);">
+                Legends of Speed Ultimate Edition adalah script automation terbaik untuk game Roblox "Legends of Speed". 
+                Dibangun dengan WindUI Framework yang modern, script ini menawarkan lebih dari <strong>1700+ baris kode</strong> 
+                dengan fitur-fitur lengkap untuk meningkatkan pengalaman bermain Anda. Dengan antarmuka yang user-friendly 
+                dan sistem automation yang canggih, script ini membantu Anda mengumpulkan orb, membeli pet & trail, 
+                melakukan rebirth, dan masih banyak lagi secara otomatis!
+            </p>
+        </section>
+
+        <!-- Statistics -->
+        <section class="fade-in delay-1">
+            <h2>📊 Statistik Script</h2>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-number">42</div>
+                    <div class="stat-label">Pets Tersedia</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">75</div>
+                    <div class="stat-label">Trails Tersedia</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Tab Fitur</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">1700+</div>
+                    <div class="stat-label">Baris Kode</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Features -->
+        <section class="fade-in delay-2">
+            <h2>✨ Fitur Utama</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">💎</div>
+                    <div class="feature-title">Auto Orb Farm</div>
+                    <div class="feature-desc">
+                        Kumpulkan semua jenis orb secara otomatis dengan smart detection. 
+                        Support Gem, Red, Yellow, Orange, dan Ethereal orbs dengan delay yang dapat disesuaikan.
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🐾</div>
+                    <div class="feature-title">Auto Pet System</div>
+                    <div class="feature-desc">
+                        Beli dan equip 42 pets secara otomatis dengan queue-based system 
+                        yang mencegah rate limiting. Dilengkapi auto-equip best pet.
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🌈</div>
+                    <div class="feature-title">Auto Trail System</div>
+                    <div class="feature-desc">
+                        Koleksi semua 75 trails dengan sistem pembelian otomatis. 
+                        Organisasi berdasarkan rarity untuk kemudahan pemilihan.
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <div class="feature-title">Auto Rebirth</div>
+                    <div class="feature-desc">
+                        Sistem rebirth otomatis dengan smart threshold detection. 
+                        Maksimalkan progress Anda tanpa perlu manual.
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">👁️</div>
+                    <div class="feature-title">Advanced ESP</div>
+                    <div class="feature-desc">
+                        Enhanced ESP dengan player boxes, names, distance, health bars, 
+                        tracers, chams, dan gem/step detection. See-through walls support!
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🏃</div>
+                    <div class="feature-title">Movement Hacks</div>
+                    <div class="feature-desc">
+                        Speed boost, jump boost, fly mode, no-clip, dan auto-run. 
+                        Semua pengaturan movement dalam satu tempat.
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <div class="feature-title">Performance Monitor</div>
+                    <div class="feature-desc">
+                        Real-time monitoring FPS, memory usage, dan ping. 
+                        Low-memory mode untuk performa optimal.
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">⚙️</div>
+                    <div class="feature-title">Config System</div>
+                    <div class="feature-desc">
+                        Simpan dan load konfigurasi dengan profile system. 
+                        Export/import settings untuk berbagi dengan teman.
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <div class="feature-title">Customizable UI</div>
+                    <div class="feature-desc">
+                        WindUI Framework dengan acrylic effect, multiple themes, 
+                        notifications, watermark, dan keybind hints.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Controls -->
+        <section class="fade-in delay-3">
+            <h2>🎮 Kontrol Keyboard</h2>
+            <ul class="controls-list">
+                <li class="control-item">
+                    <span class="key">RightShift</span>
+                    <span class="action">Toggle UI On/Off</span>
+                </li>
+                <li class="control-item">
+                    <span class="key">E</span>
+                    <span class="action">Quick Collect Orb</span>
+                </li>
+                <li class="control-item">
+                    <span class="key">R</span>
+                    <span class="action">Quick Rebirth</span>
+                </li>
+                <li class="control-item">
+                    <span class="key">T</span>
+                    <span class="action">Teleport to Nearest Orb</span>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Pets List -->
+        <section class="fade-in delay-4">
+            <h2>🐾 Daftar Pets (42 Total)</h2>
+            <div class="list-container">
+                <div class="list-category">
+                    <div class="category-title">🔴 Red Crystal</div>
+                    <ul class="category-items">
+                        <li>Red Bunny</li>
+                        <li>Red Kitty</li>
+                        <li>Green Vampy</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">🔵 Blue Crystal</div>
+                    <ul class="category-items">
+                        <li>Blue Bunny</li>
+                        <li>Dark Golem</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">🟣 Purple Crystal</div>
+                    <ul class="category-items">
+                        <li>Silver Dog</li>
+                        <li>Pink Butterfly</li>
+                        <li>Purple Pegasus</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">🟡 Yellow Crystal</div>
+                    <ul class="category-items">
+                        <li>Yellow Squeak</li>
+                        <li>Yellow Butterfly</li>
+                        <li>Green Golem</li>
+                        <li>Golden Angel</li>
+                        <li>Orange Pegasus</li>
+                        <li>Golden Phoenix</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">⚡ Lightning Crystal</div>
+                    <ul class="category-items">
+                        <li>Orange Falcon</li>
+                        <li>Green Firecaster</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">❄️ Snow Crystal</div>
+                    <ul class="category-items">
+                        <li>Blue Firecaster</li>
+                        <li>White Phoenix</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">🔥 Inferno Crystal</div>
+                    <ul class="category-items">
+                        <li>Red Phoenix</li>
+                        <li>Red Firecaster</li>
+                        <li>Flaming Hedgehog</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">🎒 Pack Pets</div>
+                    <ul class="category-items">
+                        <li>Electro Bunny</li>
+                        <li>Infernal Dragon</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">🏜️ Desert Crystal</div>
+                    <ul class="category-items">
+                        <li>Purple Angel</li>
+                        <li>Red Dragon</li>
+                        <li>Quantum Dragon</li>
+                        <li>Void Dragon</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">⚡ Electro Crystal</div>
+                    <ul class="category-items">
+                        <li>Orange Dragon</li>
+                        <li>Tundra Dragon</li>
+                        <li>Magic Butterfly</li>
+                        <li>Ultra Birdie</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">🌌 Electro Legends</div>
+                    <ul class="category-items">
+                        <li>Soul Fusion Dog</li>
+                        <li>Hypersonic Pegasus</li>
+                        <li>Dark Soul Birdie</li>
+                        <li>Eternal Nebula Dragon</li>
+                        <li>Shadows Edge Kitty</li>
+                        <li>Ultimate Overdrive Bunny</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">👽 Alien Crystal</div>
+                    <ul class="category-items">
+                        <li>Blue Phoenix</li>
+                        <li>Magical Pegasus</li>
+                        <li>Electro Golem</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">🚀 Space Crystal</div>
+                    <ul class="category-items">
+                        <li>Voltaic Falcon</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">🌴 Jungle Crystal</div>
+                    <ul class="category-items">
+                        <li>Maestro Dog</li>
+                        <li>Divine Pegasus</li>
+                        <li>Golden Viking</li>
+                        <li>Speedy Sensei</li>
+                        <li>Swift Samurai</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trails List -->
+        <section class="fade-in delay-4">
+            <h2>🌈 Daftar Trails (75 Total)</h2>
+            <div class="list-container">
+                <div class="list-category">
+                    <div class="category-title">⭐ Basic (20 Trails)</div>
+                    <ul class="category-items">
+                        <li>Default Trail</li>
+                        <li>Red Trail</li>
+                        <li>Blue Trail</li>
+                        <li>Green Trail</li>
+                        <li>Purple Trail</li>
+                        <li>Orange Trail</li>
+                        <li>Pink Trail</li>
+                        <li>Yellow Trail</li>
+                        <li>Red & Blue</li>
+                        <li>Green & Orange</li>
+                        <li>Purple & Pink</li>
+                        <li>Yellow & Blue</li>
+                        <li>Blue & Green</li>
+                        <li>Orange Snow</li>
+                        <li>Blue Snow</li>
+                        <li>Green Snow</li>
+                        <li>White Snow</li>
+                        <li>Red Snow</li>
+                        <li>Pink Snow</li>
+                        <li>Fifth Trail</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">🌟 Advanced (21 Trails)</div>
+                    <ul class="category-items">
+                        <li>Red Sparks</li>
+                        <li>Blue Sparks</li>
+                        <li>Green Sparks</li>
+                        <li>Purple Sparks</li>
+                        <li>Orange Sparks</li>
+                        <li>Pink Sparks</li>
+                        <li>Yellow Sparks</li>
+                        <li>Blue Storm</li>
+                        <li>Green Storm</li>
+                        <li>Purple Storm</li>
+                        <li>Red Storm</li>
+                        <li>Orange Storm</li>
+                        <li>Pink Storm</li>
+                        <li>Blue Coin</li>
+                        <li>Purple Coin</li>
+                        <li>Red Coin</li>
+                        <li>Green Coin</li>
+                        <li>Orange Coin</li>
+                        <li>Yellow Soul</li>
+                        <li>Green Soul</li>
+                        <li>Fourth Trail</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">💎 Rare (15 Trails)</div>
+                    <ul class="category-items">
+                        <li>Rainbow Trail</li>
+                        <li>Galaxy Trail</li>
+                        <li>Nebula Trail</li>
+                        <li>Cosmic Trail</li>
+                        <li>Star Trail</li>
+                        <li>Moon Trail</li>
+                        <li>Sun Trail</li>
+                        <li>Comet Trail</li>
+                        <li>Meteor Trail</li>
+                        <li>Aurora Trail</li>
+                        <li>Phoenix Trail</li>
+                        <li>Dragon Trail</li>
+                        <li>Unicorn Trail</li>
+                        <li>Pegasus Trail</li>
+                        <li>Angel Trail</li>
+                    </ul>
+                </div>
+
+                <div class="list-category">
+                    <div class="category-title">👑 Legendary (19 Trails)</div>
+                    <ul class="category-items">
+                        <li>Legendary Red</li>
+                        <li>Legendary Blue</li>
+                        <li>Legendary Green</li>
+                        <li>Legendary Purple</li>
+                        <li>Legendary Orange</li>
+                        <li>Legendary Pink</li>
+                        <li>Legendary Yellow</li>
+                        <li>Hyperblast</li>
+                        <li>Turbo Charge</li>
+                        <li>Nitro Boost</li>
+                        <li>Speed Demon</li>
+                        <li>Lightning Bolt</li>
+                        <li>Thunder Strike</li>
+                        <li>Voltage</li>
+                        <li>Power Surge</li>
+                        <li>Energy Wave</li>
+                        <li>Force Field</li>
+                        <li>Shield Break</li>
+                        <li>Ultimate Trail</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Changelog -->
+        <section class="fade-in delay-3">
+            <h2>📝 Changelog v6.0.0</h2>
+            <ul class="changelog-list">
+                <li class="changelog-item">
+                    <strong>✅ COMPLETE PET LIST:</strong> 42 Pets (All Non-Evolved, Verified Names)
+                </li>
+                <li class="changelog-item">
+                    <strong>✅ COMPLETE TRAIL LIST:</strong> 75 Trails (All Valid, Removed Invalid Entries)
+                </li>
+                <li class="changelog-item">
+                    <strong>✅ FIXED TYPOS:</strong> Phoenix, Sparks, Firecaster, Gem names corrected
+                </li>
+                <li class="changelog-item">
+                    <strong>✅ NEW:</strong> Auto Equip System with Smart Detection
+                </li>
+                <li class="changelog-item">
+                    <strong>✅ NEW:</strong> Queue-Based Shop System (Prevents Rate Limiting)
+                </li>
+                <li class="changelog-item">
+                    <strong>✅ NEW:</strong> Advanced Statistics with Export/Import
+                </li>
+                <li class="changelog-item">
+                    <strong>✅ NEW:</strong> Player List with ESP Toggle per Player
+                </li>
+                <li class="changelog-item">
+                    <strong>✅ NEW:</strong> Crystal Category Organization for Pets
+                </li>
+                <li class="changelog-item">
+                    <strong>✅ NEW:</strong> Rarity-Based Trail Organization
+                </li>
+                <li class="changelog-item">
+                    <strong>✅ NEW:</strong> Performance Monitor (FPS, Memory, Ping)
+                </li>
+                <li class="changelog-item">
+                    <strong>✅ NEW:</strong> Quick Actions Panel
+                </li>
+                <li class="changelog-item">
+                    <strong>✅ ENHANCED:</strong> 12 Tabs with Improved Organization
+                </li>
+                <li class="changelog-item">
+                    <strong>✅ ENHANCED:</strong> Better Error Handling & Validation
+                </li>
+                <li class="changelog-item">
+                    <strong>✅ ENHANCED:</strong> Config System with Profiles
+                </li>
+            </ul>
+        </section>
+
+        <!-- Disclaimer -->
+        <section class="disclaimer fade-in">
+            <h3>⚠️ DISCLAIMER</h3>
+            <p style="color: var(--gray); line-height: 1.6;">
+                Script ini dibuat hanya untuk tujuan <strong>edukasi</strong>. Gunakan dengan risiko Anda sendiri. 
+                Kami tidak bertanggung jawab atas segala konsekuensi yang mungkin terjadi akibat penggunaan script ini, 
+                termasuk namun tidak terbatas pada banned account, reset progress, atau tindakan lainnya dari pihak game developer.
+            </p>
+            <p style="color: var(--gray); line-height: 1.6; margin-top: 15px;">
+                <strong>Developer:</strong> Delta | <strong>Framework:</strong> WindUI | <strong>Game:</strong> Legends of Speed (Roblox)
+            </p>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p class="developer">Dibuat oleh <span>Delta</span></p>
+        <p>&copy; 2026 Legends of Speed Ultimate Edition. All Rights Reserved.</p>
+        <p style="margin-top: 15px; font-size: 0.9rem;">WindUI Framework Enhanced • Version 6.0.0</p>
+    </footer>
+
+    <script>
+        // Smooth scroll animation on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('.fade-in');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+
+        // Counter animation for stats
+        function animateCounter(element, target, duration = 2000) {
+            let start = 0;
+            const increment = target / (duration / 16);
+            
+            function updateCounter() {
+                start += increment;
+                if (start < target) {
+                    element.textContent = Math.floor(start);
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    element.textContent = target;
+                }
+            }
+            
+            updateCounter();
+        }
+
+        // Trigger counter animation when stats section is visible
+        const statsSection = document.querySelector('.stats-container');
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const statNumbers = document.querySelectorAll('.stat-number');
+                    statNumbers.forEach(stat => {
+                        const value = parseInt(stat.textContent);
+                        if (!isNaN(value)) {
+                            animateCounter(stat, value);
+                        }
+                    });
+                    statsObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        statsObserver.observe(statsSection);
+    </script>
+</body>
+</html>

@@ -545,6 +545,15 @@ local TrailDatabase = {
     },
 }
 
+local TrailCategories = {
+    "All",
+    "Basic",
+    "Advanced",
+    "Rare",
+    "Epic",
+    "Unique",
+}
+
 --[=[
     Flattened Trail List for Dropdown
     Contains all 75 trails in a single array
@@ -579,19 +588,6 @@ local TrailList = {
     
     -- Unique Trails
     "Rainbow Speed", "Rainbow Steps", "1st Trail", "Dragonfire", "Hyperblast",
-}
-
---[=[
-    Trail Category Mapping
-    Used for filtering and organization
-]=]
-local TrailCategories = {
-    "All",
-    "Basic",
-    "Advanced",
-    "Rare",
-    "Epic",
-    "Unique",
 }
 
 --[=[
@@ -875,13 +871,23 @@ local function GetFilteredTrails(category)
     if category == "All" then
         return TrailList
     end
-    
-    if TrailDatabase[category] then
-        return TrailDatabase[category]
+
+    local keyMap = {
+        ["Basic"] = "Basic",
+        ["Advanced"] = "Advanced",
+        ["Rare"] = "Rare",
+        ["Epic"] = "Epic",
+        ["Unique"] = "Unique",
+    }
+
+    local key = keyMap[category]
+    if key and TrailDatabase[key] then
+        return TrailDatabase[key]
     end
-    
+
     return TrailList
 end
+
 
 -- ================================================================================
 -- SECTION 10: QUEUE SYSTEM
@@ -1636,23 +1642,28 @@ end)
 -- ================================================================================
 
 task.spawn(function()
+    local clock = 0
     while true do
-        Stats.SessionTime = Stats.SessionTime + 1
+        local delta = RunService.RenderStepped:Wait()
+        clock = clock + delta
         
-        local fps = 1 / RunService.RenderStepped:Wait()
-        Stats.TotalFrames = Stats.TotalFrames + 1
-        Stats.AverageFPS = Stats.TotalFrames / Stats.SessionTime
-        
-        if StatsService then
-            local memory = StatsService:GetTotalMemoryUsageMb()
-            if memory > Stats.PeakMemoryUsage then
-                Stats.PeakMemoryUsage = memory
+        if clock >= 1 then
+            Stats.SessionTime = Stats.SessionTime + math.floor(clock)
+            Stats.AverageFPS = Stats.TotalFrames / math.max(1, Stats.SessionTime)
+            
+            if StatsService then
+                local memory = StatsService:GetTotalMemoryUsageMb()
+                if memory > Stats.PeakMemoryUsage then
+                    Stats.PeakMemoryUsage = memory
+                end
             end
+            
+            Stats.TotalFrames = 0
+            clock = clock % 1
         end
-        
-        task.wait(1)
     end
 end)
+
 
 -- ================================================================================
 -- SECTION 18: KEYBIND SYSTEM
